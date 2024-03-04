@@ -1,0 +1,37 @@
+{
+  "name": "@survos/pwa-extra-bundle",
+  "description": "integrate php and javascript helpers for phpwa",
+  "license": "MIT",
+  "version": "1.0.5",
+  "symfony": {
+    "controllers": {
+      "detector": {
+        "main": "src/controllers/detector_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+        }
+      },
+      "install": {
+        "main": "src/controllers/install_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+        }
+      }
+
+    },
+    "importmap": {
+    }
+  },
+  "peerDependencies": {
+    "@hotwired/stimulus": "^3.2.0"
+  },
+  "devDependencies": {
+    "@hotwired/stimulus": "^3.2.2"
+  },
+  "dependencies": {
+  }
+}

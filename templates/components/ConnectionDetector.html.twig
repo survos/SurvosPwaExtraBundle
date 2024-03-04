@@ -1,0 +1,25 @@
+{# <section class="bg-white dark:bg-gray-900"> #}
+{#    <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16 lg:px-12" {{ stimulus_controller('connection-detector') }}> #}
+{#        <div {{ stimulus_target('connection-detector', 'color') }} class="flex items-center p-4 mb-4 text-sm border rounded-lg dark:bg-gray-800 text-yellow-800 border-yellow-300 bg-yellow-50 dark:text-yellow-300 dark:border-yellow-800" role="alert"> #}
+{#            <svg class="flex-shrink-0 inline w-4 h-4 me-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20"> #}
+{#                <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/> #}
+{#            </svg> #}
+{#            <div> #}
+{#                <span class="font-medium" {{ stimulus_target('connection-detector', 'pill') }}>Connection status</span>: <span {{ stimulus_target('connection-detector', 'description') }}>We are trying to guess what is the current status of your Internet connection</span> #}
+{#            </div> #}
+{#        </div> #}
+{#    </div> #}
+{# </section> #}
+
+{% set _sc = this.stimulusController %}
+<div{{ attributes }}
+        {{ stimulus_controller(_sc) }}
+>
+
+    <div {{ stimulus_target(_sc, 'online') }} hidden>
+        {{ block('online') }}
+    </div>
+    <div {{ stimulus_target(_sc, 'offline') }} hidden>
+        {{ block('offline') }}
+    </div>
+</div>

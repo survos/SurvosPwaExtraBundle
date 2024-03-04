@@ -1,0 +1,22 @@
+
+{% set _sc = this.stimulusController %}
+<div{{ attributes }}
+        {{ stimulus_controller(_sc) }}
+>
+    <div
+            {{ stimulus_target(_sc, 'install') }}
+            {{ stimulus_action(_sc, 'install') }}
+            hidden>
+        {% block install %}
+        default install!
+        {% endblock %}
+    </div>
+
+    <div
+            {{ stimulus_target(_sc, 'launch') }}
+            {{ stimulus_action(_sc, 'launch') }}
+            >
+        {{ block('launch') }}
+    </div>
+
+</div>

@@ -4,15 +4,30 @@
 
 namespace Survos\PwaExtraBundle;
 
+use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\PwaExtraBundle\Twig\Components\ConnectionDetector;
+use Survos\PwaExtraBundle\Twig\Components\PwaInstallComponent;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
 class SurvosPwaExtraBundle extends AbstractBundle
 {
+    use HasAssetMapperTrait;
+
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        foreach ([ConnectionDetector::class, PwaInstallComponent::class] as $componentClass) {
+            $builder->register($componentClass)
+                ->setAutowired(true)
+                ->setAutoconfigured(true);
+        }
+//            ->setArgument('$stimulusController', $config['stimulus_controller']);
+
         // $builder->setParameter('survos_workflow.direction', $config['direction']);
 
         // twig classes
@@ -28,17 +43,38 @@ class SurvosPwaExtraBundle extends AbstractBundle
         */
     }
 
+    public function getPaths(): array
+    {
+        $dir = realpath(__DIR__ . '/../assets/');
+        assert(file_exists($dir), $dir);
+        return [$dir => '@survos/pwa-extra'];
+
+    }
+
     public function configure(DefinitionConfigurator $definition): void
     {
         $definition->rootNode()
             ->children()
-            ->scalarNode('direction')->defaultValue('LR')->end()
-            ->scalarNode('base_layout')->defaultValue('base.html.twig')->end()
-            ->arrayNode('entities')
-            ->scalarPrototype()
-            ->end()->end()
-            ->booleanNode('enabled')->defaultTrue()->end()
-//            ->integerNode('min_sunshine')->defaultValue(3)->end()
-            ->end();
+            ->scalarNode('stimulus_controller')->defaultValue('@survos/pwa-extra-bundle/detector')->end();
     }
+
+    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+    {
+        if (!$this->isAssetMapperAvailable($builder)) {
+            return;
+        }
+
+        $dir = realpath(__DIR__ . '/../assets/');
+        assert(file_exists($dir), $dir);
+
+        $builder->prependExtensionConfig('framework', [
+            'asset_mapper' => [
+                'paths' => [
+                    $dir => '@survos/pwa-extra',
+                ],
+            ],
+        ]);
+    }
+
+
 }
