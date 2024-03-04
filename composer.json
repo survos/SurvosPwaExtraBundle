@@ -1,10 +1,11 @@
 {
-    "name": "pwa-extra-bundle",
+    "name": "survos/pwa-extra-bundle",
     "type": "symfony-bundle",
     "description": "Extra tools for https://github.com/Spomky-Labs/phpwa",
     "keywords": [
         "symfony-ux",
-        "symfony6"
+        "pwa",
+        "symfony"
     ],
     "license": "MIT",
     "require": {
