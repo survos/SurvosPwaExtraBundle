@@ -1,0 +1,31 @@
+{% extends '@WebProfiler/Profiler/layout.html.twig' %}
+
+{# templates/data_collector/seo_collector.html.twig #}
+
+{% block toolbar %}
+    {% set icon %}
+        {# @todo: get the icon from the manifest #}
+        <span class="sf-toolbar-value"><i class="fad fa-vector-square"></i> PWA</span>
+    {% endset %}
+
+    {% set text %}
+        <div class="sf-toolbar-info-piece">
+{#            <b>Title length ({{ constant('App\\Twig\\Extension\\SeoExtension::MIN_TITLE_LENGTH') }} > {{ constant('App\\Twig\\Extension\\SeoExtension::MAX_TITLE_LENGTH') }})</b>#}
+       {# @todo: get the status based on the caching strategy #}
+            {% set status = collector.title['status'] is defined ? collector.title['status'] : 'green' %}
+            <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
+        {{ collector.route|default('nope') }}
+            </span>
+        </div>
+
+        <div class="sf-toolbar-info-piece">
+            Strategy
+            <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
+            <b>{{collector.cachingStrategy}}</b>
+            </span>
+        </div>
+
+    {% endset %}
+
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: false }) }}
+{% endblock %}

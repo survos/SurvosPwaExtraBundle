@@ -2,13 +2,14 @@
 
 namespace Survos\PwaExtraBundle\Twig;
 
+use Survos\PwaExtraBundle\Service\PwaService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 class TwigExtension extends AbstractExtension
 {
-    public function __construct(private array $config)
+    public function __construct(private PwaService $pwaService)
     {
     }
 

@@ -4,19 +4,32 @@
 
 namespace Survos\PwaExtraBundle;
 
+use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
+use Survos\PwaExtraBundle\Attribute\PwaExtra;
+use Survos\PwaExtraBundle\DataCollector\PwaCollector;
+use Survos\PwaExtraBundle\Service\PwaService;
 use Survos\PwaExtraBundle\Twig\Components\ConnectionDetector;
 use Survos\PwaExtraBundle\Twig\Components\PwaInstallComponent;
+use Survos\PwaExtraBundle\Twig\TwigExtension;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
+use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
+use Symfony\Component\Routing\Attribute\Route;
 
-class SurvosPwaExtraBundle extends AbstractBundle
+class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterface, HasAssetMapperInterface
 {
     use HasAssetMapperTrait;
+
+    public function build(ContainerBuilder $container): void
+    {
+        parent::build($container);
+        $container->addCompilerPass($this);
+    }
+
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
@@ -26,21 +39,24 @@ class SurvosPwaExtraBundle extends AbstractBundle
                 ->setAutowired(true)
                 ->setAutoconfigured(true);
         }
-//            ->setArgument('$stimulusController', $config['stimulus_controller']);
 
-        // $builder->setParameter('survos_workflow.direction', $config['direction']);
+        $builder->autowire(PwaService::class)
+            ->setArgument('$cacheFilename', $this->getCachedDataFilename($builder))
+            ->setArgument('$config', $config)
+        ;
 
-        // twig classes
+        $builder->autowire(PwaCollector::class)
+            ->setArgument('$pwaService', new Reference(PwaService::class))
+            ->addTag('data_collector', [
+                'template' => '@SurvosPwaExtra/data_collector/pwa_collector.html.twig'
+            ]);
 
-        /*
         $definition = $builder
-        ->autowire('survos.barcode_twig', BarcodeTwigExtension::class)
-        ->addTag('twig.extension');
+            ->autowire('survos.pwa_twig', TwigExtension::class)
+            ->addTag('twig.extension')
+            ->setArgument('$pwaService', new Reference(PwaService::class))
+        ;
 
-        $definition->setArgument('$widthFactor', $config['widthFactor']);
-        $definition->setArgument('$height', $config['height']);
-        $definition->setArgument('$foregroundColor', $config['foregroundColor']);
-        */
     }
 
     public function getPaths(): array
@@ -58,22 +74,60 @@ class SurvosPwaExtraBundle extends AbstractBundle
             ->scalarNode('stimulus_controller')->defaultValue('@survos/pwa-extra-bundle/detector')->end();
     }
 
-    public function prependExtension(ContainerConfigurator $container, ContainerBuilder $builder): void
+
+    private function getCachedDataFilename(ContainerBuilder $container)
     {
-        if (!$this->isAssetMapperAvailable($builder)) {
+        $kernelCacheDir = $container->getParameter('kernel.cache_dir');
+        return $kernelCacheDir . '/pwa_routes.json';
+    }
+
+    // The compiler pass
+    public function process(ContainerBuilder $container): void
+    {
+        $cachingStrategyByRoute = [];
+        $cachingStrategyByMethod = [];
+        $taggedServices = $container->findTaggedServiceIds('container.service_subscriber');
+
+        foreach (array_keys($taggedServices) as $controllerClass) {
+            if (!class_exists($controllerClass)) {
+                continue;
+            }
+            $reflectionClass = new \ReflectionClass($controllerClass);
+            $requirements = [];
+            $classCacheStrategy=null; // the default
+            // these are at the controller level, so they apply to all methods
+            foreach ($reflectionClass->getAttributes(PwaExtra::class) as $attribute) {
+                $args = $attribute->getArguments();
+                $classCacheStrategy = $args['cacheStrategy'];
+            }
+            foreach ($reflectionClass->getMethods() as $method) {
+                // there can be nore then one route on a method, but not more than one PwaExtra
+                foreach ($method->getAttributes(Route::class) as $attribute) {
+                    $args = $attribute->getArguments();
+                    $routeName = $args['name'] ?? $method->getName();
+                    if ($classCacheStrategy) {
+                        $cachingStrategyByMethod[$routeName] = $classCacheStrategy;
+                        $cachingStrategyByRoute[$routeName] = $classCacheStrategy;
+                    }
+                }
+
+                $methodRequirements = [];
+                foreach ($method->getAttributes(PwaExtra::class) as $attribute) {
+                    $args = $attribute->getArguments();
+                    $methodClassStrategy = $args['cacheStrategy'];
+                    $cachingStrategyByRoute[$routeName] = $methodClassStrategy;
+                }
+
+                // now get the route name(s) and associated the requirements by name.
+            }
+        }
+        file_put_contents($fn = $this->getCachedDataFilename($container), json_encode($cachingStrategyByRoute));
+
+        if (false === $container->hasDefinition('twig')) {
             return;
         }
+        $def = $container->getDefinition('twig');
 
-        $dir = realpath(__DIR__ . '/../assets/');
-        assert(file_exists($dir), $dir);
-
-        $builder->prependExtensionConfig('framework', [
-            'asset_mapper' => [
-                'paths' => [
-                    $dir => '@survos/pwa-extra',
-                ],
-            ],
-        ]);
     }
 
 
