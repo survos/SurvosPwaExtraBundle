@@ -28,7 +28,7 @@ final class PwaCollector extends DataCollector
     public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         $route = $this->data['route'] = $request->get('_route');
-        $cachingStrategy = $this->pwaService->getRouteCache()[$route];
+        $cachingStrategy = $this->pwaService->getRouteCache()[$route]??'Not Cached Via Attribute';
         $this->data['cachingStrategy'] = $cachingStrategy;
         $this->data['title'] = '@pwa(title)';
     }
