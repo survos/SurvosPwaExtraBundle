@@ -40,6 +40,7 @@ final class PwaCollector extends DataCollector
         $this->data['cacheTable'] = $this->pwaService->getCacheInfo();
 
         $this->data['routesFromAttributes'] = $this->pwaService->getRouteCache();
+        $this->data['manifest'] = $this->pwaService->getManifestData();
 //        dd($this->data);
 
     }
@@ -52,7 +53,11 @@ final class PwaCollector extends DataCollector
     public function getCacheData(): array
     {
         return $this->data['cacheTable'];
+    }
 
+    public function getManifestData(): array
+    {
+        return $this->data['manifest'];
     }
 
     public function getRoutesFromAttributes(): array

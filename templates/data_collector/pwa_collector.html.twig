@@ -17,8 +17,8 @@
 
 
         <div class="sf-toolbar-info-piece">
-{#            <b>Title length ({{ constant('App\\Twig\\Extension\\SeoExtension::MIN_TITLE_LENGTH') }} > {{ constant('App\\Twig\\Extension\\SeoExtension::MAX_TITLE_LENGTH') }})</b>#}
-       {# @todo: get the status based on the caching strategy #}
+            {#            <b>Title length ({{ constant('App\\Twig\\Extension\\SeoExtension::MIN_TITLE_LENGTH') }} > {{ constant('App\\Twig\\Extension\\SeoExtension::MAX_TITLE_LENGTH') }})</b> #}
+            {# @todo: get the status based on the caching strategy #}
             {% set status = collector.title['status'] is defined ? collector.title['status'] : 'green' %}
             <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
         {{ collector.route|default('nope') }}
@@ -28,7 +28,7 @@
         <div class="sf-toolbar-info-piece">
             Version {{ collector.get('workbox_version') }}
             <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
-            <b>{{collector.cachingStrategy}}</b>
+            <b>{{ collector.cachingStrategy }}</b>
             </span>
         </div>
 
@@ -57,68 +57,118 @@
 
 {% block panel %}
     {# Optional, for showing the most details. #}
-    <h2>PWA Caches</h2>
+    <div class="sf-tabs">
+        <div class="tab ">
+            <h3 class="tab-title">Caches</h3>
+            <div class="tab-content">
 
-    {{ _self.render_table(collector.cacheData) }}
-    <h2>Routes From Attributes</h2>
-    <p>
-        These routes were cached during the compliler pass, and have <b>NOT</b> been integrated into the service worker.
-        Presumably they will go into the PageCache, with the right strategy.
-    </p>
-    <p>
-        The caching strategies are just placeholders, there's probably some constants somewhere we can use.
-    </p>
-    <table>
+                <h2>PWA Caches</h2>
 
-    {% for route, strategy in collector.routesFromAttributes %}
-        <tr>
-            <td>{{ route }}</td>
-            <td>{{ strategy }}</td>
-        </tr>
+                {{ _self.render_table(collector.cacheData) }}
+            </div>
+        </div>
+        <div class="tab active">
+            <h3 class="tab-title">Manifest</h3>
+            <div class="tab-content">
+                {% set manifest = collector.manifestData %}
+                <h3>{{ manifest.name }}</h3>
+                <p>{{ manifest.description }}</p>
+                StartURL: {{ manifest.start_url }}<br />
+                ServiceWorker:
+                <a target="_blank" href="{{ manifest.serviceworker.src }}">{{ manifest.serviceworker.src }}</a>
 
-    {% endfor %}
-    </table>
+                <h3>{{ manifest.icons|length}} icons</h3>
+                <p>@todo: map from /assets to a link we use use in an img tag</p>
+                {% for icon in manifest.icons %}
+                    <li>
+                        {{ icon.src }}
+                        {% set imageUrl = icon.src|replace({'/assets': ''}) %}
+                        <a href="{{ imageUrl }}">
+                            <img src="{{ imageUrl }}" alt="{{ imageUrl }}">
+                        </a>
+                    </li>
+                {% endfor %}
 
+                <h3>{{ manifest.screenshots|length}} Screenshots</h3>
+                {% for screenshot in manifest.screenshots %}
+                        <img
+                                alt=" {{ screenshot.src }}"
+                                style="max-height: 400px" src="{{ asset(screenshot.src) }}" />
+                {% endfor %}
+            </div>
+        </div>
+
+
+                <div class="tab">
+            <h3 class="tab-title">Attribute Routes</h3>
+            <div class="tab-content">
+
+                <h2>Routes From Attributes</h2>
+                <p>
+                    These routes were tagged with #[PwaExtra()], and
+                    were cached during the compliler pass, and have <b>NOT</b> been integrated into the
+                    service
+                    worker.
+                    Presumably they will go into the PageCache, with the right strategy.
+                </p>
+                <table>
+
+
+                    {% for route, strategy in collector.routesFromAttributes %}
+                        <tr>
+                            <td>{{ route }}</td>
+                            <td>{{ strategy }}</td>
+                        </tr>
+
+                    {% endfor %}
+                </table>
+
+            </div>
+        </div>
+    </div>
     <table>
         {# use the profiler_dump() function to render the contents of dumped objects #}
         <tr>
-            {{ profiler_dump(collector.data) }}
+{#            {{ profiler_dump(collector.data) }}#}
         </tr>
     </table>
 {% endblock %}
 
-{% macro render_table(cacheTable) %}
-    <table>
-        <thead>
-        <tr>
-            <th>Class</th>
-            <th>Name</th>
-            <th>Timeout</th>
-            <th>Enabled</th>
-            <th>Regex</th>
-            <th>Max Entries</th>
-            <th>Max Age</th>
-            <th>URLs</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for cache in cacheTable %}
+
+    {% macro render_table(cacheTable) %}
+        <table>
+            <thead>
             <tr>
-                <td class="font-normal text-small nowrap">{{ cache.name }}</td>
-                <td class="font-normal text-small nowrap">{{ cache.cacheName|default('') }}</td>
-                <td class="font-normal text-small nowrap">{{ cache.networkTimeout|default('') }}</td>
-                <td class="font-normal text-small nowrap">{{ cache.enabled }}</td>
-                <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
-                <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
-                <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
-                <td class="font-normal text-small">
+                <th>Class</th>
+                <th>Name</th>
+                <th>Timeout</th>
+                <th>Enabled</th>
+                <th>Regex</th>
+                <th>Max Entries</th>
+                <th>Max Age</th>
+                <th>URLs</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for cache in cacheTable %}
+                <tr>
+                    <td class="font-normal text-small nowrap">{{ cache.name }}</td>
+                    <td class="font-normal text-small nowrap">{{ cache.cacheName|default('') }}</td>
+                    <td class="font-normal text-small nowrap">{{ cache.networkTimeout|default('') }}</td>
+                    <td class="font-normal text-small nowrap">
+                        {{ source('@WebProfiler/Icon/%s.svg'|format(cache.enabled ? 'yes' : 'no')) }}
+                    </td>
+                    <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
+                    <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
+                    <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
+                    <td class="font-normal text-small">
                         {% for url in cache.urls|default([]) %}
-                            {% if not loop.first %}<br />{% endif %}
+                            {% if not loop.first %}<br/>{% endif %}
                             {{ url.path }}
                         {% endfor %}
-                </td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-{% endmacro %}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% endmacro %}
