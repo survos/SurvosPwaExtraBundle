@@ -4,6 +4,7 @@
 
 namespace Survos\PwaExtraBundle;
 
+use SpomkyLabs\PwaBundle\Dto\ServiceWorker;
 use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PwaExtraBundle\Attribute\PwaExtra;
@@ -41,6 +42,7 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
         }
 
         $builder->autowire(PwaService::class)
+            ->setArgument('$serviceWorker', new Reference(ServiceWorker::class))
             ->setArgument('$cacheFilename', $this->getCachedDataFilename($builder))
             ->setArgument('$config', $config)
         ;

@@ -1,14 +1,21 @@
 {% extends '@WebProfiler/Profiler/layout.html.twig' %}
 
 {# templates/data_collector/seo_collector.html.twig #}
-
+{#  https://symfony.com/doc/current/profiler.html#adding-web-profiler-templates #}
 {% block toolbar %}
+
+
     {% set icon %}
+        {{ source('@SurvosPwaExtra/data_collector/pwa-svgrepo-com.svg') }}
         {# @todo: get the icon from the manifest #}
-        <span class="sf-toolbar-value"><i class="fad fa-vector-square"></i> PWA</span>
+        <span class="sf-toolbar-value">
+            PWA
+        </span>
     {% endset %}
 
     {% set text %}
+
+
         <div class="sf-toolbar-info-piece">
 {#            <b>Title length ({{ constant('App\\Twig\\Extension\\SeoExtension::MIN_TITLE_LENGTH') }} > {{ constant('App\\Twig\\Extension\\SeoExtension::MAX_TITLE_LENGTH') }})</b>#}
        {# @todo: get the status based on the caching strategy #}
@@ -19,7 +26,7 @@
         </div>
 
         <div class="sf-toolbar-info-piece">
-            Strategy
+            Version {{ collector.get('workbox_version') }}
             <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
             <b>{{collector.cachingStrategy}}</b>
             </span>
@@ -27,5 +34,71 @@
 
     {% endset %}
 
-    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: false }) }}
+    {{ include('@WebProfiler/Profiler/toolbar_item.html.twig', { link: true }) }}
 {% endblock %}
+
+
+
+{% block head %}
+    {# Optional. Here you can link to or define your own CSS and JS contents. #}
+    {{ parent() }}
+    {# Use {{ parent() }} to extend the default styles instead of overriding them. #}
+{% endblock %}
+
+{% block menu %}
+    {# This left-hand menu appears when using the full-screen profiler. #}
+    <span class="label">
+        <span class="icon">
+            <i class="fad fa-vector-square"></i>
+            <img src="..." alt=""/></span>
+        <strong>PWA</strong>
+    </span>
+{% endblock %}
+
+{% block panel %}
+    {# Optional, for showing the most details. #}
+    <h2>PWA Caches</h2>
+
+    {{ _self.render_table(collector.cacheData) }}
+    <table>
+        {# use the profiler_dump() function to render the contents of dumped objects #}
+        <tr>
+            {{ profiler_dump(collector.data) }}
+        </tr>
+    </table>
+{% endblock %}
+
+{% macro render_table(cacheTable) %}
+    <table>
+        <thead>
+        <tr>
+            <th>Class</th>
+            <th>Name</th>
+            <th>Timeout</th>
+            <th>Enabled</th>
+            <th>Regex</th>
+            <th>Max <Entries></Entries></th>
+            <th>Max Age</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for cache in cacheTable %}
+            <tr>
+                <td class="font-normal text-small nowrap">{{ cache.name }}</td>
+                <td class="font-normal text-small nowrap">{{ cache.cacheName|default('') }}</td>
+                <td class="font-normal text-small nowrap">{{ cache.networkTimeout|default('') }}</td>
+                <td class="font-normal text-small nowrap">{{ cache.enabled }}</td>
+                <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
+                <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
+                <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
+                <td class="font-normal text-small nowrap">
+                    {% for url in cache.urls|default([]) %}
+                        <li>{{ url.path }}</li>
+                    {% endfor %}
+                </td>
+
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endmacro %}

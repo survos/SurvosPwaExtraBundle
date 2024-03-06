@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
 
+use Symfony\Component\VarDumper\Cloner\Data;
 use function Symfony\Component\String\u;
 
 final class PwaCollector extends DataCollector
@@ -29,8 +30,17 @@ final class PwaCollector extends DataCollector
     {
         $route = $this->data['route'] = $request->get('_route');
         $cachingStrategy = $this->pwaService->getRouteCache()[$route]??'Not Cached Via Attribute';
+
+        $this->data = [
+            'workbox_version' => $this->pwaService->getWorkbox()->version,
+            'method' => $request->getMethod(),
+            'acceptable_content_types' => $request->getAcceptableContentTypes(),
+        ];
         $this->data['cachingStrategy'] = $cachingStrategy;
         $this->data['title'] = '@pwa(title)';
+        $this->data['route'] = $request->get('_route');
+        $this->data['cacheTable'] = $this->pwaService->getCacheInfo();
+
     }
 
     public function getRoute()
@@ -38,10 +48,28 @@ final class PwaCollector extends DataCollector
         return $this->data['route'];
     }
 
+    public function getCacheData(): array
+    {
+        return $this->data['cacheTable'];
+
+    }
+
+    public function get(string $key): string
+    {
+        return $this->data[$key];
+    }
+
+    public function getData(): Data
+    {
+        return $this->cloneVar($this->data);
+
+    }
+
     public function getCachingStrategy()
     {
         return $this->data['cachingStrategy'];
     }
+
 
     public function getName(): string
     {
