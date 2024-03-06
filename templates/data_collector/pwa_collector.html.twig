@@ -49,8 +49,8 @@
     {# This left-hand menu appears when using the full-screen profiler. #}
     <span class="label">
         <span class="icon">
-            <i class="fad fa-vector-square"></i>
-            <img src="..." alt=""/></span>
+                    {{ source('@SurvosPwaExtra/data_collector/pwa-svgrepo-com.svg') }}
+    </span>
         <strong>PWA</strong>
     </span>
 {% endblock %}
@@ -58,6 +58,42 @@
 {% block panel %}
     {# Optional, for showing the most details. #}
     <div class="sf-tabs">
+        <div class="tab active">
+            <h3 class="tab-title">Manifest</h3>
+            <div class="tab-content">
+                {% set manifest = collector.manifestData %}
+
+                <h3>{{ manifest.name }}</h3>
+                <p>{{ manifest.description }}</p>
+
+                Installable?: (not sure)<br/>
+                StartURL: {{ manifest.start_url }}<br/>
+                ServiceWorker:
+                <a target="_blank" href="{{ manifest.serviceworker.src }}">{{ manifest.serviceworker.src }}</a>
+{#                Manifest:#}
+{#                <a target="_blank" href="{{ manifest.src }}">{{ manifest.src }}</a>#}
+
+                <h3>{{ manifest.icons|length }} icons</h3>
+                <p>@todo: map from /assets to a link we use use in an img tag</p>
+                {% for icon in manifest.icons %}
+                    <li>
+                        {{ icon.src }}
+                        {% set imageUrl = icon.src|replace({'/assets': ''}) %}
+                        <a href="{{ imageUrl }}">
+                            <img style="max-width: 100px" src="{{ imageUrl }}" alt="{{ imageUrl }}">
+                        </a>
+                    </li>
+                {% endfor %}
+
+                <h3>{{ manifest.screenshots|length }} Screenshots</h3>
+                {% for screenshot in manifest.screenshots %}
+                    <img
+                            alt=" {{ screenshot.src }}"
+                            style="max-height: 400px" src="{{ asset(screenshot.src) }}"/>
+                {% endfor %}
+            </div>
+        </div>
+
         <div class="tab ">
             <h3 class="tab-title">Caches</h3>
             <div class="tab-content">
@@ -67,39 +103,9 @@
                 {{ _self.render_table(collector.cacheData) }}
             </div>
         </div>
-        <div class="tab active">
-            <h3 class="tab-title">Manifest</h3>
-            <div class="tab-content">
-                {% set manifest = collector.manifestData %}
-                <h3>{{ manifest.name }}</h3>
-                <p>{{ manifest.description }}</p>
-                StartURL: {{ manifest.start_url }}<br />
-                ServiceWorker:
-                <a target="_blank" href="{{ manifest.serviceworker.src }}">{{ manifest.serviceworker.src }}</a>
-
-                <h3>{{ manifest.icons|length}} icons</h3>
-                <p>@todo: map from /assets to a link we use use in an img tag</p>
-                {% for icon in manifest.icons %}
-                    <li>
-                        {{ icon.src }}
-                        {% set imageUrl = icon.src|replace({'/assets': ''}) %}
-                        <a href="{{ imageUrl }}">
-                            <img src="{{ imageUrl }}" alt="{{ imageUrl }}">
-                        </a>
-                    </li>
-                {% endfor %}
-
-                <h3>{{ manifest.screenshots|length}} Screenshots</h3>
-                {% for screenshot in manifest.screenshots %}
-                        <img
-                                alt=" {{ screenshot.src }}"
-                                style="max-height: 400px" src="{{ asset(screenshot.src) }}" />
-                {% endfor %}
-            </div>
-        </div>
 
 
-                <div class="tab">
+        <div class="tab">
             <h3 class="tab-title">Attribute Routes</h3>
             <div class="tab-content">
 
@@ -112,6 +118,10 @@
                     Presumably they will go into the PageCache, with the right strategy.
                 </p>
                 <table>
+                    <tr>
+                        <th>Route</th>
+                        <th>#[PwaExtra()] strategy</th>
+                    </tr>
 
 
                     {% for route, strategy in collector.routesFromAttributes %}
@@ -129,7 +139,7 @@
     <table>
         {# use the profiler_dump() function to render the contents of dumped objects #}
         <tr>
-{#            {{ profiler_dump(collector.data) }}#}
+            {#            {{ profiler_dump(collector.data) }} #}
         </tr>
     </table>
 {% endblock %}
