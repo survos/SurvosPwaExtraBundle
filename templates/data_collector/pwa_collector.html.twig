@@ -60,6 +60,25 @@
     <h2>PWA Caches</h2>
 
     {{ _self.render_table(collector.cacheData) }}
+    <h2>Routes From Attributes</h2>
+    <p>
+        These routes were cached during the compliler pass, and have <b>NOT</b> been integrated into the service worker.
+        Presumably they will go into the PageCache, with the right strategy.
+    </p>
+    <p>
+        The caching strategies are just placeholders, there's probably some constants somewhere we can use.
+    </p>
+    <table>
+
+    {% for route, strategy in collector.routesFromAttributes %}
+        <tr>
+            <td>{{ route }}</td>
+            <td>{{ strategy }}</td>
+        </tr>
+
+    {% endfor %}
+    </table>
+
     <table>
         {# use the profiler_dump() function to render the contents of dumped objects #}
         <tr>
@@ -77,8 +96,9 @@
             <th>Timeout</th>
             <th>Enabled</th>
             <th>Regex</th>
-            <th>Max <Entries></Entries></th>
+            <th>Max Entries</th>
             <th>Max Age</th>
+            <th>URLs</th>
         </tr>
         </thead>
         <tbody>
@@ -91,12 +111,12 @@
                 <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
                 <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
                 <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
-                <td class="font-normal text-small nowrap">
-                    {% for url in cache.urls|default([]) %}
-                        <li>{{ url.path }}</li>
-                    {% endfor %}
+                <td class="font-normal text-small">
+                        {% for url in cache.urls|default([]) %}
+                            {% if not loop.first %}<br />{% endif %}
+                            {{ url.path }}
+                        {% endfor %}
                 </td>
-
             </tr>
         {% endfor %}
         </tbody>

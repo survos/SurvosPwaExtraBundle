@@ -46,7 +46,7 @@ final class PwaService
         return $this->config[$key]; // @todo: error checking
     }
 
-    public function getRouteCache()
+    public function getRouteCache(): array
     {
         return json_decode(file_get_contents($this->cacheFilename), true);
     }

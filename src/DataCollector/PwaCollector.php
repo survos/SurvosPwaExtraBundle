@@ -33,13 +33,14 @@ final class PwaCollector extends DataCollector
 
         $this->data = [
             'workbox_version' => $this->pwaService->getWorkbox()->version,
-            'method' => $request->getMethod(),
-            'acceptable_content_types' => $request->getAcceptableContentTypes(),
         ];
         $this->data['cachingStrategy'] = $cachingStrategy;
         $this->data['title'] = '@pwa(title)';
         $this->data['route'] = $request->get('_route');
         $this->data['cacheTable'] = $this->pwaService->getCacheInfo();
+
+        $this->data['routesFromAttributes'] = $this->pwaService->getRouteCache();
+//        dd($this->data);
 
     }
 
@@ -51,6 +52,12 @@ final class PwaCollector extends DataCollector
     public function getCacheData(): array
     {
         return $this->data['cacheTable'];
+
+    }
+
+    public function getRoutesFromAttributes(): array
+    {
+        return $this->data['routesFromAttributes'];
 
     }
 
