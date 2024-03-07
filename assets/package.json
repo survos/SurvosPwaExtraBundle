@@ -2,11 +2,19 @@
   "name": "@survos/pwa-extra-bundle",
   "description": "integrate php and javascript helpers for phpwa",
   "license": "MIT",
-  "version": "1.0.5",
+  "version": "1.1.1",
   "symfony": {
     "controllers": {
       "detector": {
         "main": "src/controllers/detector_controller.js",
+        "webpackMode": "eager",
+        "fetch": "lazy",
+        "enabled": true,
+        "autoimport": {
+        }
+      },
+      "toggle_online": {
+        "main": "src/controllers/toggle_online_controller.js",
         "webpackMode": "eager",
         "fetch": "lazy",
         "enabled": true,
