@@ -49,7 +49,7 @@
     {# This left-hand menu appears when using the full-screen profiler. #}
     <span class="label">
         <span class="icon">
-                    {{ source('@SurvosPwaExtra/data_collector/pwa-svgrepo-com.svg') }}
+                {{ source('@SurvosPwaExtra/data_collector/pwa-svgrepo-com.svg') }}
     </span>
         <strong>PWA</strong>
     </span>
@@ -58,7 +58,7 @@
 {% block panel %}
     {# Optional, for showing the most details. #}
     <div class="sf-tabs">
-        <div class="tab active">
+        <div class="tab">
             <h3 class="tab-title">Manifest</h3>
             <div class="tab-content">
                 {% set manifest = collector.manifestData %}
@@ -70,18 +70,20 @@
                 StartURL: {{ manifest.start_url }}<br/>
                 ServiceWorker:
                 <a target="_blank" href="{{ manifest.serviceworker.src }}">{{ manifest.serviceworker.src }}</a>
-{#                Manifest:#}
-{#                <a target="_blank" href="{{ manifest.src }}">{{ manifest.src }}</a>#}
+                {#                Manifest: #}
+                {#                <a target="_blank" href="{{ manifest.src }}">{{ manifest.src }}</a> #}
 
                 <h3>{{ manifest.icons|length }} icons</h3>
                 <p>@todo: map from /assets to a link we use use in an img tag</p>
                 {% for icon in manifest.icons %}
                     <li>
-                        {{ icon.src }}
+
                         {% set imageUrl = icon.src|replace({'/assets': ''}) %}
                         <a href="{{ imageUrl }}">
-                            <img style="max-width: 100px" src="{{ imageUrl }}" alt="{{ imageUrl }}">
+                            <img style="max-width: 100px" src="{{ imageUrl }}" title="{{ icon.src }}"
+                                 alt="{{ imageUrl }}">
                         </a>
+                        <br/>Sizes: {{ icon.sizes|join(',') }}
                     </li>
                 {% endfor %}
 
@@ -94,7 +96,7 @@
             </div>
         </div>
 
-        <div class="tab ">
+        <div class="tab active">
             <h3 class="tab-title">Caches</h3>
             <div class="tab-content">
 
@@ -153,10 +155,9 @@
                 <th>Name</th>
                 <th>Timeout</th>
                 <th>Enabled</th>
-                <th>Regex</th>
+                <th>Regex/Urls</th>
                 <th>Max Entries</th>
                 <th>Max Age</th>
-                <th>URLs</th>
             </tr>
             </thead>
             <tbody>
@@ -168,15 +169,20 @@
                     <td class="font-normal text-small nowrap">
                         {{ source('@WebProfiler/Icon/%s.svg'|format(cache.enabled ? 'yes' : 'no')) }}
                     </td>
-                    <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
-                    <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
+                    {% if cache.urls|default(false) %}
+                        <td colspan="2">
+                            {% for url in cache.urls|default([]) %}
+                                {#  convert to a url #}
+                                {% set link = path(url.path, url.params|default([])) %}
+                                {% if not loop.first %}<br/>{% endif %}
+                                <a href="{{ link }}" target="_blank">{{ link }}</a>
+                            {% endfor %}
+                        </td>
+                    {% else %}
+                        <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
+                        <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
+                    {% endif %}
                     <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
-                    <td class="font-normal text-small">
-                        {% for url in cache.urls|default([]) %}
-                            {% if not loop.first %}<br/>{% endif %}
-                            {{ url.path }}
-                        {% endfor %}
-                    </td>
                 </tr>
             {% endfor %}
             </tbody>
