@@ -6,25 +6,33 @@ export default class extends Controller {
 
   connect() {
     console.log('navigator status at connect', navigator.onLine);
-    if (navigator.onLine) {
-      this.showOnline();
-    } else {
-      this.showOffline();
-    }
 
-    window.ononline = (event) => {
-      console.log("You ARE now connected to the network.");
-    };
-    window.onoffline = (event) => {
-      console.error("You are NOT connected to the network.");
-    };
+    // https://github.com/gokulkrishh/demo-progressive-web-app/blob/master/js/offline.js
+    document.addEventListener('DOMContentLoaded', (event) => {
+      console.log('checking for navigator.online');
+      //On initial load to check connectivity
+      if (navigator.onLine) {
+        this.showOnline();
+      } else {
+        this.showOffline();
+      }
 
-    window.addEventListener("offline", () => {
-      this.showOffline();
+      window.ononline = (event) => {
+        console.log("You ARE now connected to the network.");
+      };
+      window.onoffline = (event) => {
+        console.error("You are NOT connected to the network.");
+      };
+
+      window.addEventListener("offline", () => {
+        this.showOffline();
+      });
+      window.addEventListener("online", () => {
+        this.showOnline();
+      });
+
     });
-    window.addEventListener("online", () => {
-      this.showOnline();
-    });
+
   }
 
 disconnect() {
