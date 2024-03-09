@@ -191,6 +191,14 @@
 
     {% endmacro %}
     {% macro render_table(cacheInfo) %}
+        {% set anchorMap = {
+            cacheFirst : 'cache_first_cache_falling_back_to_network',
+            networkFirst : 'network_first_network_falling_back_to_cache',
+            networkOnly: 'network_only',
+            cacheOnly: 'cache_only',
+            'workbox.recipes.googleFontsCache' : 'cache-first',
+            staleWhileRevalidate: 'stale-while-revalidate'
+        } %}
         <table>
             <thead>
             <tr>
@@ -207,7 +215,7 @@
                         <td>{{ strategy.name }}<br />
                             <span class="font-normal text-small">{{ shortClassName }}</span></td>
                         <td>
-                            {% set anchor = strategy.strategy|u.snake|replace({'_':'-'}) %}
+                            {% set anchor = anchorMap[strategy.strategy] %}
                             {% set referenceUrl = 'https://developer.chrome.com/docs/workbox/modules/workbox-strategies#' ~ anchor %}
                             <a target="_blank" href="{{ referenceUrl }}">
                                 {{ strategy.strategy }}
