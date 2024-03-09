@@ -26,15 +26,23 @@ final class PwaCollector extends DataCollector
     {
     }
 
+    public function getReferenceUrl(string $strategy): string
+    {
+        return $this->pwaService->getReferenceUrl($strategy);
+    }
+
     public function collect(Request $request, Response $response, \Throwable $exception = null): void
     {
         $route = $this->data['route'] = $request->get('_route');
+
+        // this is only for the attribute, which doesn't even work yet.
         $cachingStrategy = $this->pwaService->getRouteCache()[$route]??'Not Cached Via Attribute';
+        $this->data['cachingStrategy'] = $cachingStrategy;
+//        $this->data['cachingStrategy'] = null;
 
         $this->data = [
             'workbox_version' => $this->pwaService->getWorkbox()->version,
         ];
-        $this->data['cachingStrategy'] = $cachingStrategy;
         $this->data['title'] = '@pwa(title)';
         $this->data['route'] = $request->get('_route');
         $this->data['cacheTable'] = $this->pwaService->getCacheInfo();

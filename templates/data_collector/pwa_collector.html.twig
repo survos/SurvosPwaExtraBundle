@@ -28,7 +28,7 @@
         <div class="sf-toolbar-info-piece">
             Version {{ collector.get('workbox_version') }}
             <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
-            <b>{{ collector.cachingStrategy }}</b>
+{#            <b>{{ collector.cachingStrategy|default('') }}</b>#}
             </span>
         </div>
 
@@ -106,6 +106,24 @@
             </div>
         </div>
 
+        {% for shortClassName, strategies in collector.cacheData %}
+        {% for strategy in strategies %}
+            {% set urls = strategy.options.warmUrls|default([]) %}
+        {% if urls|length %}
+        <div class="tab">
+            <h3 class="tab-title">{{ strategy.name }} {{ strategy.strategy }}
+                <span class="badge">{{ urls|length }}</span>
+            </h3>
+            <div class="tab-content">
+                <h1>{{ strategy.name }}</h1>
+                <div>{{ strategy.strategy }}</div>
+                <div>{{ strategy.urlPattern }}</div>
+                {{ _self.render_urls(strategy, urls) }}
+            </div>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% endfor %}
 
         <div class="tab">
             <h3 class="tab-title">Attribute Routes</h3>
@@ -147,44 +165,95 @@
 {% endblock %}
 
 
-    {% macro render_table(cacheTable) %}
+
+    {% macro render_urls(strategy, urls) %}
+        <table>
+            <tbody>
+
+                    {% for url in urls %}
+                        <tr>
+{#                            <td>{{ strategy|keys|json_encode }}</td>#}
+                            <td>
+                                <a href="{{ url }}">
+                                    {{ url }}
+                                </a>
+                                {#                                                    {% set link = path(url.path, url.params|default([])) %}#}
+                                {#                                                    {% if not loop.first %}<br/>{% endif %}#}
+                                {#                                                    <a href="{{ link }}" target="_blank">{{ link }}</a>#}
+
+                            </td>
+
+                        </tr>
+
+                    {% endfor %}
+            </tbody>
+        </table>
+
+    {% endmacro %}
+    {% macro render_table(cacheInfo) %}
         <table>
             <thead>
             <tr>
-                <th>Class</th>
                 <th>Name</th>
-                <th>Timeout</th>
-                <th>Enabled</th>
-                <th>Regex/Urls</th>
-                <th>Max Entries</th>
-                <th>Max Age</th>
+                <th>Stategy</th>
+                <th>Options</th>
+                <th>Urls</th>
             </tr>
             </thead>
             <tbody>
-            {% for cache in cacheTable %}
-                <tr>
-                    <td class="font-normal text-small nowrap">{{ cache.name }}</td>
-                    <td class="font-normal text-small nowrap">{{ cache.cacheName|default('') }}</td>
-                    <td class="font-normal text-small nowrap">{{ cache.networkTimeout|default('') }}</td>
-                    <td class="font-normal text-small nowrap">
-                        {{ source('@WebProfiler/Icon/%s.svg'|format(cache.enabled ? 'yes' : 'no')) }}
-                    </td>
-                    {% if cache.urls|default(false) %}
-                        <td colspan="2">
-                            {% for url in cache.urls|default([]) %}
-                                {#  convert to a url #}
-                                {% set link = path(url.path, url.params|default([])) %}
-                                {% if not loop.first %}<br/>{% endif %}
-                                <a href="{{ link }}" target="_blank">{{ link }}</a>
-                            {% endfor %}
+            {% for shortClassName, strategies in cacheInfo %}
+                {% for strategy in strategies %}
+                    <tr>
+                        <td>{{ strategy.name }}<br />
+                            <span class="font-normal text-small">{{ shortClassName }}</span></td>
+                        <td>
+                            {% set anchor = strategy.strategy|u.snake|replace({'_':'-'}) %}
+                            {% set referenceUrl = 'https://developer.chrome.com/docs/workbox/modules/workbox-strategies#' ~ anchor %}
+                            <a target="_blank" href="{{ referenceUrl }}">
+                                {{ strategy.strategy }}
+                            </a>
+                            <br/>{{ strategy.urlPattern }}
                         </td>
-                    {% else %}
-                        <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td>
-                        <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td>
-                    {% endif %}
-                    <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td>
-                </tr>
+                        <td>
+
+                            {% for var, val in strategy.options %}
+                                {% if var != 'warmUrls' %}
+                                    <li>{{ var }} {{ val|json_encode }}</li>
+                                {% endif %}
+                            {% endfor %}
+                            {#                            <br />{{ strategy.options|json_encode }} #}
+                            {#                                        {{ profiler_dump(strategy) }} #}
+
+                        </td>
+                        <td>
+                            {{ strategy.options.warmUrls|default([])|length }} urls
+                        </td>
+                    </tr>
+                {% endfor %}
             {% endfor %}
             </tbody>
         </table>
+        {#                    <td class="font-normal text-small nowrap">{{ cache.networkTimeout|default('') }}</td> #}
+        {#                    <td class="font-normal text-small nowrap"> #}
+        {#                        {{ source('@WebProfiler/Icon/%s.svg'|format(cache.enabled ? 'yes' : 'no')) }} #}
+        {#                    </td> #}
+        {#                    {% if cache.urls|default(false) %} #}
+        {#                        <td colspan="2"> #}
+        {#                            {% for url in cache.urls|default([]) %} #}
+        {#                                #}{#  convert to a url #}
+        {#                                {% set link = path(url.path, url.params|default([])) %} #}
+        {#                                {% if not loop.first %}<br/>{% endif %} #}
+        {#                                <a href="{{ link }}" target="_blank">{{ link }}</a> #}
+        {#                            {% endfor %} #}
+        {#                        </td> #}
+        {#                    {% else %} #}
+        {#                        <td class="font-normal text-small nowrap">{{ cache.regex|default('-') }}</td> #}
+        {#                        <td class="font-normal text-small text-bold nowrap">{{ cache.maxEntries|default('') }}</td> #}
+        {#                    {% endif %} #}
+        {#                    <td class="font-normal text-small text-bold nowrap">{{ cache.maxAge|default('') }}</td> #}
+        {#                </tr> #}
+        {#            {% endfor %} #}
+        {#            </tbody> #}
+        {#        </table> #}
     {% endmacro %}
+

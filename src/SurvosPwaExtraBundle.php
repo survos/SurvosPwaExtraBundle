@@ -20,6 +20,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\Routing\Attribute\Route;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterface, HasAssetMapperInterface
 {
@@ -44,6 +45,7 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
         $builder->autowire(PwaService::class)
             ->setArgument('$serviceWorker', new Reference(ServiceWorker::class))
             ->setArgument('$cacheFilename', $this->getCachedDataFilename($builder))
+            ->setArgument('$cacheServices', tagged_iterator('spomky_labs_pwa.cache_strategy'))
             ->setArgument('$config', $config)
         ;
 
