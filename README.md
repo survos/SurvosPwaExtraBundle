@@ -62,4 +62,9 @@ symfony server:start -d
 symfony open:local
 
 composer config minimum-stability dev
-composer require --dev spomky-labs/phpwa
+composer require --dev spomky-labs/pwa-bundle
+
+# Existing PWAs to convert to Symfony
+
+https://github.com/tacman/tutorial-pwa-capture-camera
+https://github.com/JoseJPR/tutorial-pwa-capture-audio#readme
