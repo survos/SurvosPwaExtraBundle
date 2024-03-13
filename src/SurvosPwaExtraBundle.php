@@ -4,10 +4,12 @@
 
 namespace Survos\PwaExtraBundle;
 
+use Psr\Container\ContainerInterface;
 use SpomkyLabs\PwaBundle\Dto\ServiceWorker;
 use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PwaExtraBundle\Attribute\PwaExtra;
+use Survos\PwaExtraBundle\CacheWarmer\PwaCacheWarmer;
 use Survos\PwaExtraBundle\DataCollector\PwaCollector;
 use Survos\PwaExtraBundle\Service\PwaService;
 use Survos\PwaExtraBundle\Twig\Components\ConnectionDetector;
@@ -20,6 +22,7 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 use Symfony\Component\Routing\Attribute\Route;
+use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 
 class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterface, HasAssetMapperInterface
@@ -46,8 +49,7 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
             ->setArgument('$serviceWorker', new Reference(ServiceWorker::class))
             ->setArgument('$cacheFilename', $this->getCachedDataFilename($builder))
             ->setArgument('$cacheServices', tagged_iterator('spomky_labs_pwa.cache_strategy'))
-            ->setArgument('$config', $config)
-        ;
+            ->setArgument('$config', $config);
 
         $builder->autowire(PwaCollector::class)
             ->setArgument('$pwaService', new Reference(PwaService::class))
@@ -55,11 +57,18 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
                 'template' => '@SurvosPwaExtra/data_collector/pwa_collector.html.twig'
             ]);
 
+
+        $builder
+            ->autowire('pwa.cache_warmer', PwaCacheWarmer::class)
+            ->setArgument('$router', new Reference('router'))
+//        ->addTag('container.service_subscriber', ['id' => 'pwa_service'])
+            ->addTag('kernel.cache_warmer', ['priority' => 100]);
+
+
         $definition = $builder
             ->autowire('survos.pwa_twig', TwigExtension::class)
             ->addTag('twig.extension')
-            ->setArgument('$pwaService', new Reference(PwaService::class))
-        ;
+            ->setArgument('$pwaService', new Reference(PwaService::class));
 
     }
 
@@ -91,6 +100,10 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
         $cachingStrategyByRoute = [];
         $cachingStrategyByMethod = [];
         $taggedServices = $container->findTaggedServiceIds('container.service_subscriber');
+//        $router = $container->getServiceIds()
+//        $router = $this->container->get('router');
+//        dd($router->getRouteCollection());
+
 
         foreach (array_keys($taggedServices) as $controllerClass) {
             if (!class_exists($controllerClass)) {
@@ -98,7 +111,7 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
             }
             $reflectionClass = new \ReflectionClass($controllerClass);
             $requirements = [];
-            $classCacheStrategy=null; // the default
+            $classCacheStrategy = null; // the default
             // these are at the controller level, so they apply to all methods
             foreach ($reflectionClass->getAttributes(PwaExtra::class) as $attribute) {
                 $args = $attribute->getArguments();
@@ -109,6 +122,8 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
                 foreach ($method->getAttributes(Route::class) as $attribute) {
                     $args = $attribute->getArguments();
                     $routeName = $args['name'] ?? $method->getName();
+                    // get the regex
+//                    $details =
                     if ($classCacheStrategy) {
                         $cachingStrategyByMethod[$routeName] = $classCacheStrategy;
                         $cachingStrategyByRoute[$routeName] = $classCacheStrategy;

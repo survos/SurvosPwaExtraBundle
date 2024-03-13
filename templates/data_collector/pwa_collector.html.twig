@@ -109,19 +109,31 @@
         {% for shortClassName, strategies in collector.cacheData %}
         {% for strategy in strategies %}
             {% set urls = strategy.options.warmUrls|default([]) %}
-        {% if urls|length %}
         <div class="tab">
-            <h3 class="tab-title">{{ strategy.name }} {{ strategy.strategy }}
-                <span class="badge">{{ urls|length }}</span>
+            {# @todo: indicate strategy (color? font?) #}
+            {% set abbrMap = {
+                cacheFirst: 'cF',
+                cacheOnly: 'cO',
+                staleWhileRevalidate: 'sWR',
+                networkFirst: 'nF',
+                networkOnly: 'nO',
+                'workbox.recipes.googleFontsCache': 'gFC'
+
+            } %}
+            <h3 class="tab-title" title=" {{ strategy.strategy }}">{{ strategy.name }}
+                <span class="badge">{{ urls|length? urls|length }}
+                    {{ abbrMap[strategy.strategy] }}
+                </span>
             </h3>
             <div class="tab-content">
                 <h1>{{ strategy.name }}</h1>
                 <div>{{ strategy.strategy }}</div>
                 <div>{{ strategy.urlPattern }}</div>
+            {% if urls|length %}
                 {{ _self.render_urls(strategy, urls) }}
+            {% endif %}
             </div>
         </div>
-        {% endif %}
         {% endfor %}
         {% endfor %}
 

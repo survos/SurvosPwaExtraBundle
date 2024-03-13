@@ -12,11 +12,13 @@ use SpomkyLabs\PwaBundle\Dto\Workbox;
 use SpomkyLabs\PwaBundle\Service\CacheStrategy;
 use SpomkyLabs\PwaBundle\Service\HasCacheStrategies;
 use Symfony\Component\DependencyInjection\Attribute\TaggedIterator;
+use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Yaml\Yaml;
 
 // NetworkOnly, CacheOnly, CacheFirst, NetworkFirst, or StaleWhileRevalidate
+
 /**
  * PWA related Twig helpers.
  */
@@ -27,18 +29,19 @@ final class PwaService
     public const NetworkOnly = 'NetworkOnly';
     public const CacheOnly = 'CacheOnly';
     public const CacheFirst = 'CacheFirst';
-    public const NetworkFirst='NetworkFirst';
-    public const StaleWhileRevalidate='StaleWhileRevalidate';
+    public const NetworkFirst = 'NetworkFirst';
+    public const StaleWhileRevalidate = 'StaleWhileRevalidate';
 
     public function __construct(
         private string                                                                $cacheFilename,
         private ServiceWorker                                                         $serviceWorker,
         private Manifest                                                              $manifest,
-        private NormalizerInterface $normalizer,
+        private NormalizerInterface                                                   $normalizer,
         private SerializerInterface                                                   $serializer,
+        private RouterInterface                                                       $router,
         #[TaggedIterator('spomky_labs_pwa.cache_strategy')] private readonly iterable $cacheServices,
-        private array                                                                 $config=[],
-        )
+        private array                                                                 $config = [],
+    )
     {
     }
 
@@ -63,6 +66,14 @@ final class PwaService
 
     }
 
+    public function getRouteDetails(string $route)
+    {
+        $routes = $this->router->getRouteCollection();
+        dd($routes);
+
+
+    }
+
     public function getCacheInfo()
     {
 
@@ -72,23 +83,23 @@ final class PwaService
             $strategies = $service->getCacheStrategies();
             $services[(new \ReflectionClass($service::class))->getShortName()] = $this->normalizer->normalize($strategies, null);
         }
+//        dd($services);
         return $services;
-        dd($services);
 
-            $strategies = $service->getCacheStrategies();
-            dd($this->normalizer->normalize($strategies, null));
-            foreach ($strategies as $strategy) {
-                dd($this->normalizer->normalize($strategy, null));
-                dd($service, $strategy);
-                $cache[] = [
-                    $strategy->name,
-                    $strategy->strategy,
-                    $strategy->urlPattern,
-                    $strategy->enabled ? 'Yes' : 'No',
-                    $strategy->requireWorkbox ? 'Yes' : 'No',
-                    Yaml::dump($strategy->options),
-                ];
-            }
+        $strategies = $service->getCacheStrategies();
+        dd($this->normalizer->normalize($strategies, null));
+        foreach ($strategies as $strategy) {
+            dd($this->normalizer->normalize($strategy, null));
+            dd($service, $strategy);
+            $cache[] = [
+                $strategy->name,
+                $strategy->strategy,
+                $strategy->urlPattern,
+                $strategy->enabled ? 'Yes' : 'No',
+                $strategy->requireWorkbox ? 'Yes' : 'No',
+                Yaml::dump($strategy->options),
+            ];
+        }
         dd($this->normalizer->normalize($this->cacheServices, null));
 
         $cache = [];
@@ -101,15 +112,15 @@ final class PwaService
         }
 //        dd($cacheStrategies);
         dd($this->getWorkbox());
-        foreach ($this->getWorkbox() as $var=>$val) {
+        foreach ($this->getWorkbox() as $var => $val) {
             if (is_object($val)) {
                 $className = $val::class;
-                $name = $val->cacheName??null;
+                $name = $val->cacheName ?? null;
 //                dd($val, $cacheStrategies[$name]);
                 if (str_ends_with($className, 'Cache')) {
                     $cache[] = (array)$val + [
-                        'strategies' => $name ? $cacheStrategies[$name]:[],
-                        'shortName' => (new \ReflectionClass($className))->getShortName()];
+                            'strategies' => $name ? $cacheStrategies[$name] : [],
+                            'shortName' => (new \ReflectionClass($className))->getShortName()];
                 }
             }
         }
