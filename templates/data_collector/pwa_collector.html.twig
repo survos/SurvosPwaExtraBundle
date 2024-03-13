@@ -107,9 +107,17 @@
         </div>
 
         {% for shortClassName, strategies in collector.cacheData %}
-        {% for strategy in strategies %}
-            {% set urls = strategy.options.warmUrls|default([]) %}
         <div class="tab">
+            <h3 class="tab-title" title="{{shortClassName}}">
+                {{ shortClassName }}
+                <span class="badge">
+                    {{ strategies|length? strategies|length }}
+                </span>
+            </h3>
+            <div class="tab-content">
+
+            {% for strategy in strategies %}
+                {% set urls = strategy.options.warmUrls|default([]) %}
             {# @todo: indicate strategy (color? font?) #}
             {% set abbrMap = {
                 cacheFirst: 'cF',
@@ -120,21 +128,22 @@
                 'workbox.recipes.googleFontsCache': 'gFC'
 
             } %}
-            <h3 class="tab-title" title=" {{ strategy.strategy }}">{{ strategy.name }}
-                <span class="badge">{{ urls|length? urls|length }}
-                    {{ abbrMap[strategy.strategy] }}
+            <h3 title=" {{ strategy.strategy }}">{{ strategy.name }}
+                {{ strategy.strategy }}
+                <span class="badge">
+                    {{ urls|length? urls|length }}
                 </span>
             </h3>
-            <div class="tab-content">
-                <h1>{{ strategy.name }}</h1>
-                <div>{{ strategy.strategy }}</div>
+                <h2>{{ strategy.strategy }} </h2>
                 <div>{{ strategy.urlPattern }}</div>
+                {{ strategy.options.plugins|default('')|json_encode }}
+                <div>{{ strategy.broadcast_channel|default('') }}</div>
             {% if urls|length %}
                 {{ _self.render_urls(strategy, urls) }}
             {% endif %}
+            {% endfor %}
             </div>
         </div>
-        {% endfor %}
         {% endfor %}
 
         <div class="tab">
@@ -237,7 +246,15 @@
                         <td>
 
                             {% for var, val in strategy.options %}
-                                {% if var != 'warmUrls' %}
+                                {% if var == 'maxAge' %}
+                                    {% if val %}
+                                <li>
+                                    {{ val }} seconds
+                                    Age: {{ _self.secondsToMinutes(val) }} minutes
+                                    usingDate: {{ val|date('y m H:i:s') }}
+                                </li>
+                                        {% endif %}
+                                {% elseif var != 'warmUrls' %}
                                     <li>{{ var }} {{ val|json_encode }}</li>
                                 {% endif %}
                             {% endfor %}
@@ -277,3 +294,30 @@
         {#        </table> #}
     {% endmacro %}
 
+{# https://caffeinecreations.ca/blog/twig-macro-convert-seconds-to-hhmmss/ #}
+    {% macro secondsToMinutes(seconds) %}
+
+        {# set hours minus minutes/seconds #}
+        {% set hours = seconds / 3600 % 60 %}
+
+        {% if hours  < 1 %}
+            {# set hours to nothing #}
+            {% set hours = null %}
+        {% else %}
+            {# output hours with a colon: #}
+            {% set hours = hours|number_format ~ ':' %}
+        {% endif %}
+
+        {# set minutes remain but no seconds and with a colon #}
+        {% set minutes = seconds / 60 % 60  ~ ':' %}
+
+        {# set seconds but no minutes or hours #}
+        {% set seconds = seconds % 60 %}
+        {% if seconds < 10 %}
+            {# add a leading zero if seconds are less than 10 #}
+            {% set seconds = '0' ~ seconds %}
+        {% endif %}
+
+        {{ hours }}{{ minutes}}{{ seconds }}
+
+    {% endmacro %}

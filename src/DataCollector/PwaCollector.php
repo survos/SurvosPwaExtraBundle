@@ -47,6 +47,8 @@ final class PwaCollector extends DataCollector
         $this->data['route'] = $request->get('_route');
         $this->data['cacheTable'] = $this->pwaService->getCacheInfo();
 
+        // @todo: convert maxAge to human readable, https://www.w3resource.com/php-exercises/php-date-exercise-21.php
+
         $this->data['routesFromAttributes'] = $this->pwaService->getRouteCache();
         $this->data['manifest'] = $this->pwaService->getManifestData();
 //        dd($this->data);

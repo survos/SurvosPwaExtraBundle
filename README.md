@@ -16,12 +16,19 @@ To generate the initial PWA Yaml configuration, run
 bin/console survos:pwa:config
 ```
 
+To create screenshots!!
+
+composer req symfony/mime symfony/filesystem symfony/panther
+composer require --dev dbrekelmans/bdi
+vendor/bin/bdi detect drivers
+
 
 
 
 symfony new pwa-demo --webapp --php=8.2 && cd pwa-demo
 composer config extra.symfony.allow-contrib true
 composer req symfony/asset-mapper symfony/stimulus-bundle
+
 
 bin/console importmap:require bootstrap
 echo "import 'bootstrap/dist/css/bootstrap.min.css'" >> assets/app.js
