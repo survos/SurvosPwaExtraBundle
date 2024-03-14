@@ -80,7 +80,7 @@
 
                         {% set imageUrl = icon.src|replace({'/assets': ''}) %}
                         <a href="{{ imageUrl }}">
-                            <img style="max-width: 100px" src="{{ imageUrl }}" title="{{ icon.src }}"
+                            <img style="max-width: 100px" src="{{ asset(imageUrl) }}" title="{{ icon.src }}"
                                  alt="{{ imageUrl }}">
                         </a>
                         <br/>Sizes: {{ icon.sizes|join(',') }}
