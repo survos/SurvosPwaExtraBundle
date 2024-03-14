@@ -8,7 +8,23 @@ The idea is that after these tools are developed they'll be incorporated into th
 
 Before generating the initial configuration, generate the icons.  Yes, this is a bit of a pain, but it's a requirement for the manifest.  A manifest is required to run offline.
 
+```bash
+composer req symfony/ux-twig-component
+```
 
+```twig
+<twig:PwaInstall>
+    <twig:block name="launch">
+        Lauch button here...
+    </twig:block>
+    <twig:block name="install">
+        <twig:Button variant="success">
+            Install as PWA
+        </twig:Button>
+
+    </twig:block>
+</twig:PwaInstall>
+```
 
 To generate the initial PWA Yaml configuration, run 
 
