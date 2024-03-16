@@ -85,7 +85,7 @@ symfony server:start -d
 symfony open:local
 
 composer config minimum-stability dev
-composer require --dev spomky-labs/pwa-bundle
+composer require spomky-labs/pwa-bundle
 
 # Existing PWAs to convert to Symfony
 
