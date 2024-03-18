@@ -42,6 +42,39 @@
 {% block head %}
     {# Optional. Here you can link to or define your own CSS and JS contents. #}
     {{ parent() }}
+    <script type="module">
+        console.log('hello from debugger');
+        caches.keys().then( (cacheNames) => {
+            console.log('cacheNames: ', cacheNames);
+                cacheNames.forEach((cacheName, index, array) => {
+                    console.log(cacheName, index);
+                    const cacheStorage = caches.open(cacheName).then((cache) => {
+                        var ul = document.getElementById(cacheName + "-list");
+                        cache.keys().then((key) => {
+                            key.forEach((x) => {
+                                var li = document.createElement("li");
+                                // console.log(x);
+                                li.appendChild(document.createTextNode(x.url));
+                                ul.appendChild(li);
+                            });
+                            // console.log(key);
+                        })
+                    })
+                    // cache.delete(request);
+                });
+            Promise.all(
+            );
+        });
+            // Promise.all(
+            //     cacheNames.map((cacheName) => {
+            //         if (!expectedCacheNamesSet.has(cacheName)) {
+            //             // If this cache name isn't present in the set of
+            //             // "expected" cache names, then delete it.
+            //             console.log("Deleting out of date cache:", cacheName);
+            //             return caches.delete(cacheName);
+            //         }
+            //     }),
+    </script>
     {# Use {{ parent() }} to extend the default styles instead of overriding them. #}
 {% endblock %}
 
@@ -117,6 +150,7 @@
             <div class="tab-content">
 
             {% for strategy in strategies %}
+                {{ strategy|keys|join('|') }}
                 {% set urls = strategy.preloadUrls|default([]) %}
             {# @todo: indicate strategy (color? font?) #}
             {% set abbrMap = {
@@ -128,13 +162,16 @@
                 'workbox.recipes.googleFontsCache': 'gFC'
 
             } %}
-            <h3 title=" {{ strategy.strategy }}">{{ strategy.name }}
-                {{ strategy.strategy }}
-                <span class="badge">
-                    {{ urls|length? urls|length }}
-                </span>
+            <h3 title=" {{ strategy.strategy }}">
+                {{ strategy.name }} / {{ strategy.strategy }}
             </h3>
-                <h2>{{ strategy.strategy }} </h2>
+                {% if urls|length %}
+                <span class="badge">
+                    {{ urls|length? urls|length }} (pre-cached)
+                </span>
+                {% endif %}
+                <ol id="{{ strategy.name }}-list">
+                </ol>
                 <div>{{ strategy.matchCallback }}</div>
                 {{ strategy.options.plugins|default('')|json_encode }}
                 <div>{{ strategy.broadcast_channel|default('') }}</div>
