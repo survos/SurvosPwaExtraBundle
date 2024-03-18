@@ -67,7 +67,7 @@ cat > templates/app/index.html.twig <<END
         </div>
     <a class="btn btn-primary">
         <span class="bi bi-download"></span>
-        Install as PWA</a>
+        Install as PWA</a>cd 
     </div>
 {% endblock %}
 END
@@ -91,3 +91,9 @@ composer require spomky-labs/pwa-bundle
 
 https://github.com/tacman/tutorial-pwa-capture-camera
 https://github.com/JoseJPR/tutorial-pwa-capture-audio#readme
+https://github.com/thecodearcher/PWA-currency-converter
+https://github.com/SalahHamza/currency-converter-pwa```
+
+# Worth Reading
+https://www.educative.io/answers/how-to-do-offline-data-sync-in-pwa
+https://dexie.org/docs/Tutorial/

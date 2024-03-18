@@ -117,7 +117,7 @@
             <div class="tab-content">
 
             {% for strategy in strategies %}
-                {% set urls = strategy.options.warmUrls|default([]) %}
+                {% set urls = strategy.preloadUrls|default([]) %}
             {# @todo: indicate strategy (color? font?) #}
             {% set abbrMap = {
                 cacheFirst: 'cF',
@@ -135,7 +135,7 @@
                 </span>
             </h3>
                 <h2>{{ strategy.strategy }} </h2>
-                <div>{{ strategy.urlPattern }}</div>
+                <div>{{ strategy.matchCallback }}</div>
                 {{ strategy.options.plugins|default('')|json_encode }}
                 <div>{{ strategy.broadcast_channel|default('') }}</div>
             {% if urls|length %}
@@ -213,12 +213,12 @@
     {% endmacro %}
     {% macro render_table(cacheInfo) %}
         {% set anchorMap = {
-            cacheFirst : 'cache_first_cache_falling_back_to_network',
-            networkFirst : 'network_first_network_falling_back_to_cache',
-            networkOnly: 'network_only',
-            cacheOnly: 'cache_only',
+            CacheFirst : 'cache_first_cache_falling_back_to_network',
+            NetworkFirst : 'network_first_network_falling_back_to_cache',
+            NetworkOnly: 'network_only',
+            CacheOnly: 'cache_only',
             'workbox.recipes.googleFontsCache' : 'cache-first',
-            staleWhileRevalidate: 'stale-while-revalidate'
+            StaleWhileRevalidate: 'stale-while-revalidate'
         } %}
         <table>
             <thead>
@@ -241,7 +241,7 @@
                             <a target="_blank" href="{{ referenceUrl }}">
                                 {{ strategy.strategy }}
                             </a>
-                            <br/>{{ strategy.urlPattern }}
+                            <br/>{{ strategy.matchCallback }}
                         </td>
                         <td>
 
@@ -254,7 +254,8 @@
                                     usingDate: {{ val|date('y m H:i:s') }}
                                 </li>
                                         {% endif %}
-                                {% elseif var != 'warmUrls' %}
+                                {% elseif var != 'preload_urls' %}
+
                                     <li>{{ var }} {{ val|json_encode }}</li>
                                 {% endif %}
                             {% endfor %}
@@ -263,7 +264,7 @@
 
                         </td>
                         <td>
-                            {{ strategy.options.warmUrls|default([])|length }} urls
+                            {{ strategy.preloadUrls|default([])|length }} urls
                         </td>
                     </tr>
                 {% endfor %}
