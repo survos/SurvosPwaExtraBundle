@@ -10,6 +10,7 @@ use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PwaExtraBundle\Attribute\PwaExtra;
 use Survos\PwaExtraBundle\CacheWarmer\PwaCacheWarmer;
+use Survos\PwaExtraBundle\Command\ConfigureCommand;
 use Survos\PwaExtraBundle\DataCollector\PwaCollector;
 use Survos\PwaExtraBundle\Service\PwaService;
 use Survos\PwaExtraBundle\Twig\Components\ConnectionDetector;
@@ -38,6 +39,13 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        $builder->autowire(ConfigureCommand::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->addTag('console.command')
+            ->setArgument('$bag', new Reference('parameter_bag'))
+        ;
 
         foreach ([ConnectionDetector::class, PwaInstallComponent::class] as $componentClass) {
             $builder->register($componentClass)
