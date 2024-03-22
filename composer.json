@@ -2,6 +2,7 @@
     "name": "survos/pwa-extra-bundle",
     "type": "symfony-bundle",
     "description": "Extra tools for https://github.com/Spomky-Labs/phpwa",
+    "minimum-stability": "dev",
     "keywords": [
         "symfony-ux",
         "pwa",
@@ -10,13 +11,13 @@
     "license": "MIT",
     "require": {
         "php": "^8.1",
-        "spomky-labs/pwa-bundle": "^1.1",
+        "spomky-labs/pwa-bundle": "1.1.x",
         "symfony/config": "^6.4 || ^7.0",
         "symfony/dependency-injection": "^6.4 || ^7.0",
         "symfony/http-kernel": "^6.4 || ^7.0",
         "symfony/asset-mapper": "^6.4 || ^7.0",
         "twig/twig": "^3.4",
-        "survos/core-bundle": "^1.6"
+        "survos/core-bundle": "^1.5"
     },
     "autoload": {
         "psr-4": {

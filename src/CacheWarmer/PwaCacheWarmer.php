@@ -37,6 +37,9 @@ class PwaCacheWarmer implements CacheWarmerInterface, ServiceSubscriberInterface
 
     public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
+        return [];
+
+
         if ($route = $this->router->getRouteCollection()->get('app_voyage_show')) {
             dd($buildDir, $route, $route->compile()->getRegex());
 

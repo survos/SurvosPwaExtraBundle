@@ -28,7 +28,7 @@
         <div class="sf-toolbar-info-piece">
             Version {{ collector.get('workbox_version') }}
             <span class="sf-toolbar-status sf-toolbar-status-{{ status }}">
-{#            <b>{{ collector.cachingStrategy|default('') }}</b>#}
+{#            <b>{{ collector.cachingStrategy|default('') }}</b> #}
             </span>
         </div>
 
@@ -42,38 +42,67 @@
 {% block head %}
     {# Optional. Here you can link to or define your own CSS and JS contents. #}
     {{ parent() }}
+
+    {% for shortClassName, strategies in collector.cacheData %}
+
+        {% for strategy in strategies %}
+            {% set urls = strategy.preloadUrls|default([]) %}
+            {# set a javascript array #}
+        {% endfor %}
+    {% endfor %}
+
     <script type="module">
-        console.log('hello from debugger');
-        caches.keys().then( (cacheNames) => {
-            console.log('cacheNames: ', cacheNames);
-                cacheNames.forEach((cacheName, index, array) => {
-                    console.log(cacheName, index);
-                    const cacheStorage = caches.open(cacheName).then((cache) => {
-                        var ul = document.getElementById(cacheName + "-list");
-                        cache.keys().then((key) => {
-                            key.forEach((x) => {
-                                var li = document.createElement("li");
-                                // console.log(x);
-                                li.appendChild(document.createTextNode(x.url));
+        const full = location.protocol + '//' + location.host;
+
+        caches.keys().then((cacheNames) => {
+            cacheNames.forEach((cacheName, index, array) => {
+                const cacheStorage = caches.open(cacheName).then((cache) => {
+                    var ul = document.getElementById(cacheName + "-list");
+                    if (typeof ul == 'undefined') {
+                        console.error("Missing list element for " + cacheName);
+                        // the variable is defined
+                    }
+                    cache.keys().then((key) => {
+                        key.forEach((x) => {
+                            var li = document.createElement("li");
+
+                            var a = document.createElement('a');
+                            const text = x.url.replace(full, '');
+                            //
+
+                            // Create the text node for anchor element.
+                            var link = document.createTextNode(text);
+
+                            // Append the text node to anchor element.
+                            a.appendChild(link);
+
+                            // Set the title.
+                            // a.title = "This is Link";
+
+                            // Set the href property.
+                            a.href = x.url;
+                            li.appendChild(a);
+                            try {
                                 ul.appendChild(li);
-                            });
-                            // console.log(key);
-                        })
+                            } catch (e) {
+                                console.error('no list for ' + cacheName);
+                            }
+                        });
+                        // console.log(key);
                     })
-                    // cache.delete(request);
-                });
-            Promise.all(
-            );
+                })
+                // cache.delete(request);
+            });
         });
-            // Promise.all(
-            //     cacheNames.map((cacheName) => {
-            //         if (!expectedCacheNamesSet.has(cacheName)) {
-            //             // If this cache name isn't present in the set of
-            //             // "expected" cache names, then delete it.
-            //             console.log("Deleting out of date cache:", cacheName);
-            //             return caches.delete(cacheName);
-            //         }
-            //     }),
+        // Promise.all(
+        //     cacheNames.map((cacheName) => {
+        //         if (!expectedCacheNamesSet.has(cacheName)) {
+        //             // If this cache name isn't present in the set of
+        //             // "expected" cache names, then delete it.
+        //             console.log("Deleting out of date cache:", cacheName);
+        //             return caches.delete(cacheName);
+        //         }
+        //     }),
     </script>
     {# Use {{ parent() }} to extend the default styles instead of overriding them. #}
 {% endblock %}
@@ -101,8 +130,11 @@
 
                 Installable?: (not sure)<br/>
                 StartURL: {{ manifest.start_url }}<br/>
-                ServiceWorker:
+                ServiceWorker: {% if manifest.serviceworker %}
                 <a target="_blank" href="{{ manifest.serviceworker.src }}">{{ manifest.serviceworker.src }}</a>
+                {% else %}
+                    not enabled
+                {% endif %}
                 {#                Manifest: #}
                 {#                <a target="_blank" href="{{ manifest.src }}">{{ manifest.src }}</a> #}
 
@@ -110,12 +142,13 @@
                 <p>@todo: map from /assets to a link we use use in an img tag</p>
                 {% for icon in manifest.icons %}
                     <li>
-
                         {% set imageUrl = icon.src|replace({'/assets': ''}) %}
-                        <a href="{{ imageUrl }}">
-                            <img style="max-width: 100px" src="{{ asset(imageUrl) }}" title="{{ icon.src }}"
-                                 alt="{{ imageUrl }}">
-                        </a>
+                        {{ icon.src }}
+                        {#  remove until we can figure out the mapping, or get it from the application tab in chrome #}
+                        {#                        <a href="{{ imageUrl }}"> #}
+                        {#                            <img style="max-width: 100px" src="{{ asset(imageUrl) }}" title="{{ icon.src }}" #}
+                        {#                                 alt="{{ imageUrl }}"> #}
+                        {#                        </a> #}
                         <br/>Sizes: {{ icon.sizes|join(',') }}
                     </li>
                 {% endfor %}
@@ -140,47 +173,47 @@
         </div>
 
         {% for shortClassName, strategies in collector.cacheData %}
-        <div class="tab">
-            <h3 class="tab-title" title="{{shortClassName}}">
-                {{ shortClassName }}
-                <span class="badge">
+            <div class="tab">
+                <h3 class="tab-title" title="{{ shortClassName }}">
+                    {{ shortClassName }}
+                    <span class="badge">
                     {{ strategies|length? strategies|length }}
                 </span>
-            </h3>
-            <div class="tab-content">
+                </h3>
+                <div class="tab-content">
 
-            {% for strategy in strategies %}
-                {{ strategy|keys|join('|') }}
-                {% set urls = strategy.preloadUrls|default([]) %}
-            {# @todo: indicate strategy (color? font?) #}
-            {% set abbrMap = {
-                cacheFirst: 'cF',
-                cacheOnly: 'cO',
-                staleWhileRevalidate: 'sWR',
-                networkFirst: 'nF',
-                networkOnly: 'nO',
-                'workbox.recipes.googleFontsCache': 'gFC'
+                    {% for strategy in strategies %}
+                        {{ strategy|keys|join('|') }}
+                        {% set urls = strategy.preloadUrls|default([]) %}
+                        {# @todo: indicate strategy (color? font?) #}
+                        {% set abbrMap = {
+                            cacheFirst: 'cF',
+                            cacheOnly: 'cO',
+                            staleWhileRevalidate: 'sWR',
+                            networkFirst: 'nF',
+                            networkOnly: 'nO',
+                            'workbox.recipes.googleFontsCache': 'gFC'
 
-            } %}
-            <h3 title=" {{ strategy.strategy }}">
-                {{ strategy.name }} / {{ strategy.strategy }}
-            </h3>
-                {% if urls|length %}
-                <span class="badge">
+                        } %}
+                        <h3 title=" {{ strategy.strategy }}">
+                            {{ strategy.name }} / {{ strategy.strategy }}
+                        </h3>
+                        {% if urls|length %}
+                            <span class="badge">
                     {{ urls|length? urls|length }} (pre-cached)
                 </span>
-                {% endif %}
-                <ol id="{{ strategy.name }}-list">
-                </ol>
-                <div>{{ strategy.matchCallback }}</div>
-                {{ strategy.options.plugins|default('')|json_encode }}
-                <div>{{ strategy.broadcast_channel|default('') }}</div>
-            {% if urls|length %}
-                {{ _self.render_urls(strategy, urls) }}
-            {% endif %}
-            {% endfor %}
+                        {% endif %}
+                        <ol id="{{ strategy.name }}-list">
+                        </ol>
+                        <div>{{ strategy.matchCallback }}</div>
+                        {{ strategy.options.plugins|default('')|json_encode }}
+                        <div>{{ strategy.broadcast_channel|default('') }}</div>
+                        {% if urls|length %}
+                            {{ _self.render_urls(strategy, urls) }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
             </div>
-        </div>
         {% endfor %}
 
         <div class="tab">
@@ -228,22 +261,22 @@
         <table>
             <tbody>
 
-                    {% for url in urls %}
-                        <tr>
-{#                            <td>{{ strategy|keys|json_encode }}</td>#}
-                            <td>
-                                <a href="{{ url }}">
-                                    {{ url }}
-                                </a>
-                                {#                                                    {% set link = path(url.path, url.params|default([])) %}#}
-                                {#                                                    {% if not loop.first %}<br/>{% endif %}#}
-                                {#                                                    <a href="{{ link }}" target="_blank">{{ link }}</a>#}
+            {% for url in urls %}
+                <tr>
+                    {#                            <td>{{ strategy|keys|json_encode }}</td> #}
+                    <td>
+                        <a href="{{ url }}">
+                            {{ url }}
+                        </a>
+                        {#                                                    {% set link = path(url.path, url.params|default([])) %} #}
+                        {#                                                    {% if not loop.first %}<br/>{% endif %} #}
+                        {#                                                    <a href="{{ link }}" target="_blank">{{ link }}</a> #}
 
-                            </td>
+                    </td>
 
-                        </tr>
+                </tr>
 
-                    {% endfor %}
+            {% endfor %}
             </tbody>
         </table>
 
@@ -270,7 +303,7 @@
             {% for shortClassName, strategies in cacheInfo %}
                 {% for strategy in strategies %}
                     <tr>
-                        <td>{{ strategy.name }}<br />
+                        <td>{{ strategy.name }}<br/>
                             <span class="font-normal text-small">{{ shortClassName }}</span></td>
                         <td>
                             {% set anchor = anchorMap[strategy.strategy] %}
@@ -285,12 +318,12 @@
                             {% for var, val in strategy.options %}
                                 {% if var == 'maxAge' %}
                                     {% if val %}
-                                <li>
-                                    {{ val }} seconds
-                                    Age: {{ _self.secondsToMinutes(val) }} minutes
-                                    usingDate: {{ val|date('y m H:i:s') }}
-                                </li>
-                                        {% endif %}
+                                        <li>
+                                            {{ val }} seconds
+                                            Age: {{ _self.secondsToMinutes(val) }} minutes
+                                            usingDate: {{ val|date('y m H:i:s') }}
+                                        </li>
+                                    {% endif %}
                                 {% elseif var != 'preload_urls' %}
 
                                     <li>{{ var }} {{ val|json_encode }}</li>
@@ -356,6 +389,6 @@
             {% set seconds = '0' ~ seconds %}
         {% endif %}
 
-        {{ hours }}{{ minutes}}{{ seconds }}
+        {{ hours }}{{ minutes }}{{ seconds }}
 
     {% endmacro %}

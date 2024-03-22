@@ -5,11 +5,13 @@
 namespace Survos\PwaExtraBundle;
 
 use Psr\Container\ContainerInterface;
+use SpomkyLabs\PwaBundle\CachingStrategy\HasCacheStrategies;
 use SpomkyLabs\PwaBundle\Dto\ServiceWorker;
 use Survos\CoreBundle\HasAssetMapperInterface;
 use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PwaExtraBundle\Attribute\PwaExtra;
 use Survos\PwaExtraBundle\CacheWarmer\PwaCacheWarmer;
+use Survos\PwaExtraBundle\CachingStrategy\DymamicCachingStrategy;
 use Survos\PwaExtraBundle\Command\ConfigureCommand;
 use Survos\PwaExtraBundle\DataCollector\PwaCollector;
 use Survos\PwaExtraBundle\Service\PwaService;
@@ -39,6 +41,15 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
 
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
+
+        if (0)
+        $builder->autowire(DymamicCachingStrategy::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+//            ->setArgument('$workbox', new Reference('workbox'))
+            ->addTag('spomky_labs_pwa.cache_strategy')
+        ;
+
 
         $builder->autowire(ConfigureCommand::class)
             ->setAutoconfigured(true)
