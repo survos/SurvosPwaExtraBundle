@@ -48,8 +48,8 @@ export default class extends Controller {
   }
 
 disconnect() {
-    window.removeEventListener("offline");
-    window.removeEventListener("online");
+    // window.removeEventListener("offline");
+    // window.removeEventListener("online");
   }
 
   showOnline() {

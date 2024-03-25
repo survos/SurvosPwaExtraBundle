@@ -12,7 +12,8 @@ use Survos\CoreBundle\Traits\HasAssetMapperTrait;
 use Survos\PwaExtraBundle\Attribute\PwaExtra;
 use Survos\PwaExtraBundle\CacheWarmer\PwaCacheWarmer;
 use Survos\PwaExtraBundle\CachingStrategy\DymamicCachingStrategy;
-use Survos\PwaExtraBundle\Command\ConfigureCommand;
+use Survos\PwaExtraBundle\Command\PwaConfigureCommand;
+use Survos\PwaExtraBundle\Controller\PwaExtraController;
 use Survos\PwaExtraBundle\DataCollector\PwaCollector;
 use Survos\PwaExtraBundle\Service\PwaService;
 use Survos\PwaExtraBundle\Twig\Components\ConnectionDetector;
@@ -42,6 +43,12 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
     public function loadExtension(array $config, ContainerConfigurator $container, ContainerBuilder $builder): void
     {
 
+        $builder->autowire(PwaExtraController::class)
+            ->setAutoconfigured(true)
+            ->setPublic(true)
+            ->setArgument('$config', $config)
+        ;
+
         if (0)
         $builder->autowire(DymamicCachingStrategy::class)
             ->setAutoconfigured(true)
@@ -51,7 +58,7 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
         ;
 
 
-        $builder->autowire(ConfigureCommand::class)
+        $builder->autowire(PwaConfigureCommand::class)
             ->setAutoconfigured(true)
             ->setPublic(true)
             ->addTag('console.command')
