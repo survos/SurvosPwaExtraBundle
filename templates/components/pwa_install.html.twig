@@ -2,14 +2,15 @@
 <div{{ attributes }}
         {{ stimulus_controller(_sc) }}
 >
-    <div
+    <button
             {{ stimulus_target(_sc, 'install') }}
             {{ stimulus_action(_sc, 'install') }}
-            hidden>
+    >
+        <h1>PWA INSTALL????</h1>
         {% block install %}
         default install!
         {% endblock %}
-    </div>
+    </button>
 
     <div
             {{ stimulus_target(_sc, 'launch') }}

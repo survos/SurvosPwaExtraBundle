@@ -16,9 +16,17 @@ export default class extends Controller {
 
     if (isInStandaloneMode()) {
       console.log("webapp is installed");
-      launchElement.setAttribute("hidden", "hidden");
+      launchElement.style.display = "block";
+      installButton.style.display = "none";
+    } else {
+      // launchElement.setAttribute("hidden", "hidden");
+      launchElement.style.display = "none";
+      installButton.style.display = "block";
+      console.log("webapp is NOT installed");
+
     }
     window.addEventListener("beforeinstallprompt", (event) => {
+      console.log('beforeinstallprompt');
       event.preventDefault();
       installPrompt = event;
       installButton.removeAttribute("hidden");
@@ -29,7 +37,8 @@ export default class extends Controller {
 
     installButton.addEventListener("click", async () => {
       if (!installPrompt) {
-        return;
+        console.log('no installPrompt');
+        // return;
       }
       const result = await installPrompt.prompt();
       console.log(`Install prompt was: ${result.outcome}`);
