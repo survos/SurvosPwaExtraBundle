@@ -38,7 +38,7 @@ export default class extends Controller {
     installButton.addEventListener("click", async () => {
       if (!installPrompt) {
         console.log('no installPrompt');
-        // return;
+        return;
       }
       const result = await installPrompt.prompt();
       console.log(`Install prompt was: ${result.outcome}`);
