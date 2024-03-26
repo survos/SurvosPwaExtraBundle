@@ -16,10 +16,10 @@
         {{ stimulus_controller(_sc) }}
 >
 
-    <div {{ stimulus_target(_sc, 'online') }} hidden>
+    <div {{ stimulus_target(_sc, 'online') }} style="display: block">
         {{ block('online') }}
     </div>
-    <div {{ stimulus_target(_sc, 'offline') }} hidden>
+    <div {{ stimulus_target(_sc, 'offline') }} style="display: block">
         {{ block('offline') }}
     </div>
 </div>

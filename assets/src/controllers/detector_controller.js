@@ -6,9 +6,15 @@ export default class extends Controller {
 
   connect() {
     console.log('navigator status at connect', navigator.onLine);
+    if (navigator.onLine) {
+      this.showOnline();
+    } else {
+      this.showOffline();
+    }
 
     // https://github.com/gokulkrishh/demo-progressive-web-app/blob/master/js/offline.js
-    document.addEventListener('DOMContentLoaded', (event) => {
+    document.addEventListener('DOMContentLoaded', (event) =>
+    {
       console.log('checking for navigator.online');
       //On initial load to check connectivity
       if (navigator.onLine) {
@@ -42,8 +48,14 @@ disconnect() {
 
   showOnline() {
     console.log('online');
-    this.offlineTarget.hidden = true
-    this.onlineTarget.hidden = false
+    this.offlineTarget.style.display = "none";
+    this.onlineTarget.style.display = "block";
+
+
+    // this.offlineTarget.setAttribute('hidden','hidden')
+    // this.onlineTarget.removeAttribute('hidden')
+    // this.offlineTarget.hidden = true
+    // this.onlineTarget.hidden = false
 
     // this.cleanupClasses();
     // this.colorTarget.classList.add('text-green-800', 'border-green-300', 'bg-green-50', 'dark:text-green-300', 'dark:border-green-800');
@@ -53,8 +65,11 @@ disconnect() {
 
   showOffline() {
     console.log('offline');
-    this.offlineTarget.hidden = false
-    this.onlineTarget.hidden = true
+    this.offlineTarget.style.display = "block";
+    this.onlineTarget.style.display = "none";
+
+    // this.offlineTarget.hidden = false
+    // this.onlineTarget.hidden = true
     // this.cleanupClasses();
     // this.colorTarget.classList.add('text-red-800', 'border-red-300', 'bg-red-50', 'dark:text-red-300', 'dark:border-red-800');
     // this.pillTarget.innerHTML = 'Offline';
