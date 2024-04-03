@@ -24,7 +24,7 @@ class PwaConfigureCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->addArgument('name', InputArgument::OPTIONAL, 'application name', null)
