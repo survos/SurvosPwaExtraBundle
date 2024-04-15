@@ -34,17 +34,21 @@ bin/console survos:pwa:config
 
 To create screenshots!!
 
+```bash
 composer req symfony/mime symfony/filesystem symfony/panther
 composer require --dev dbrekelmans/bdi
 vendor/bin/bdi detect drivers
+symfony server:status
+bin/console pwa:create:screenshot https://127.0.0.1:8001/ -o homepage
+```
 
+# Simple installation
 
-
-
+```bash
 symfony new pwa-demo --webapp --php=8.2 && cd pwa-demo
 composer config extra.symfony.allow-contrib true
-composer req symfony/asset-mapper symfony/stimulus-bundle
-
+composer config minimum-stability dev
+composer require spomky-labs/pwa-bundle:1.2.x
 
 bin/console importmap:require bootstrap
 echo "import 'bootstrap/dist/css/bootstrap.min.css'" >> assets/app.js
@@ -83,9 +87,7 @@ END
 
 symfony server:start -d
 symfony open:local
-
-composer config minimum-stability dev
-composer require spomky-labs/pwa-bundle
+```
 
 # Existing PWAs to convert to Symfony
 
