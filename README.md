@@ -18,7 +18,7 @@ composer req symfony/ux-twig-component
         Lauch button here...
     </twig:block>
     <twig:block name="install">
-        <twig:Button variant="success">
+        <twig:button variant="success">
             Install as PWA
         </twig:Button>
 

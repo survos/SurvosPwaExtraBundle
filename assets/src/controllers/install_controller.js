@@ -4,9 +4,13 @@ import { Controller } from '@hotwired/stimulus';
 export default class extends Controller {
     static targets = ['install', 'launch']
 
+  initialize() {
+    super.initialize();
+    this.installPrompt = null;
+  }
+
   connect() {
     console.log('checking installation status');
-    let installPrompt = null;
     const installButton = this.installTarget;
     const launchElement = this.launchTarget;
 
@@ -26,9 +30,9 @@ export default class extends Controller {
 
     }
     window.addEventListener("beforeinstallprompt", (event) => {
-      console.log('beforeinstallprompt');
       event.preventDefault();
-      installPrompt = event;
+      this.installPrompt = event;
+      console.error('beforeinstallprompt', this.installPrompt);
       installButton.removeAttribute("hidden");
       launchElement.setAttribute("hidden", "hidden");
     });
@@ -36,17 +40,17 @@ export default class extends Controller {
 // main.js
 
     installButton.addEventListener("click", async () => {
-      if (!installPrompt) {
+      if (!this.installPrompt) {
         console.log('no installPrompt');
         return;
       }
-      const result = await installPrompt.prompt();
+      const result = await this.installPrompt.prompt();
       console.log(`Install prompt was: ${result.outcome}`);
       disableInAppInstallPrompt();
     });
 
     function disableInAppInstallPrompt() {
-      installPrompt = null;
+      this.installPrompt = null;
       installButton.setAttribute("hidden", "");
     }
   }
