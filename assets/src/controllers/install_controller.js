@@ -10,21 +10,19 @@ export default class extends Controller {
   }
 
   connect() {
-    console.log("checking installation status");
     const installButton = this.installTarget;
     const launchElement = this.launchTarget;
     // This doesn't work for some reason
     // const onlineButton = this.onlineTarget;
-    console.log(installButton, launchElement);
-    // Hide launch element for the moment 
+    // Hide launch element for the moment
     launchElement.style.display = "none";
 
     if(localStorage.getItem('appInstalled') === 'true'){
       // app is installed hide install button
       installButton.style.display = "none";
     }
-    
-    console.log(installButton,launchElement);
+
+    // console.log(installButton,launchElement);
 
     // https://stackoverflow.com/questions/41742390/javascript-to-check-if-pwa-or-mobile-web
     // const isInStandaloneMode = () =>
