@@ -16,7 +16,6 @@ export default class extends Controller {
     // const onlineButton = this.onlineTarget;
     // Hide launch element for the moment
     launchElement.style.display = "none";
-
     if(localStorage.getItem('appInstalled') === 'true'){
       // app is installed hide install button
       installButton.style.display = "none";
@@ -44,8 +43,9 @@ export default class extends Controller {
     window.addEventListener("beforeinstallprompt", (event) => {
       event.preventDefault();
       this.installPrompt = event;
-      console.error("beforeinstallprompt", this.installPrompt);
-      // installButton.removeAttribute("hidden");
+      // console.error("beforeinstallprompt", this.installPrompt);
+      console.log(event);
+      installButton.removeAttribute("hidden");
       // launchElement.setAttribute("hidden", "hidden");
     });
 
@@ -59,8 +59,10 @@ export default class extends Controller {
       const result = await this.installPrompt.prompt();
       console.log(`Install prompt was: ${result.outcome}`);
       localStorage.setItem('appInstalled', 'true');
-      installButton.style.display = "none";
-      disableInAppInstallPrompt();
+      if (result.outcome === 'accepted') {
+        installButton.style.display = "none";
+        disableInAppInstallPrompt();
+      }
     });
 
     function disableInAppInstallPrompt() {
