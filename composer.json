@@ -17,7 +17,7 @@
         "symfony/http-kernel": "^6.4 || ^7.0",
         "symfony/asset-mapper": "^6.4 || ^7.0",
         "twig/twig": "^3.4",
-        "survos/core-bundle": "^1.5.387"
+        "survos/core-bundle": "^1.5.388"
     },
     "autoload": {
         "psr-4": {
