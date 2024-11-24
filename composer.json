@@ -25,7 +25,8 @@
         "symfony/phpunit-bridge": "^6.4 || ^7.1",
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
-        "zenstruck/console-extra": "^1.4"
+        "zenstruck/console-extra": "^1.4",
+        "symfony/ux-twig-component": "2.x-dev"
     },
     "autoload": {
         "psr-4": {

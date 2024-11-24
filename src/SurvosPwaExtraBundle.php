@@ -49,14 +49,6 @@ class SurvosPwaExtraBundle extends AbstractBundle implements CompilerPassInterfa
             ->setArgument('$config', $config)
         ;
 
-        if (0)
-        $builder->autowire(DymamicCachingStrategy::class)
-            ->setAutoconfigured(true)
-            ->setPublic(true)
-//            ->setArgument('$workbox', new Reference('workbox'))
-            ->addTag('spomky_labs_pwa.cache_strategy')
-        ;
-
 
         $builder->autowire(PwaConfigureCommand::class)
             ->setAutoconfigured(true)
