@@ -10,13 +10,12 @@ use Survos\PwaExtraBundle\Service\PwaService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\DataCollector\DataCollector;
-
 use Symfony\Component\VarDumper\Cloner\Data;
+
 use function Symfony\Component\String\u;
 
 final class PwaCollector extends DataCollector
 {
-
     private const MAX_PANEL_WIDTH = 50;
     private const CLASS_ERROR = 'red';
     private const CLASS_WARNING = 'yellow';
@@ -31,12 +30,12 @@ final class PwaCollector extends DataCollector
         return $this->pwaService->getReferenceUrl($strategy);
     }
 
-    public function collect(Request $request, Response $response, \Throwable $exception = null): void
+    public function collect(Request $request, Response $response, ?\Throwable $exception = null): void
     {
         $route = $this->data['route'] = $request->get('_route');
 
         // this is only for the attribute, which doesn't even work yet.
-        $cachingStrategy = $this->pwaService->getRouteCache()[$route]??'Not Cached Via Attribute';
+        $cachingStrategy = $this->pwaService->getRouteCache()[$route] ?? 'Not Cached Via Attribute';
         $this->data['cachingStrategy'] = $cachingStrategy;
 //        $this->data['cachingStrategy'] = null;
 
@@ -52,7 +51,6 @@ final class PwaCollector extends DataCollector
         $this->data['routesFromAttributes'] = $this->pwaService->getRouteCache();
         $this->data['manifest'] = $this->pwaService->getManifestData();
 //        dd($this->data);
-
     }
 
     public function getRoute()
@@ -73,7 +71,6 @@ final class PwaCollector extends DataCollector
     public function getRoutesFromAttributes(): array
     {
         return $this->data['routesFromAttributes'];
-
     }
 
     public function get(string $key): string
@@ -84,7 +81,6 @@ final class PwaCollector extends DataCollector
     public function getData(): Data
     {
         return $this->cloneVar($this->data);
-
     }
 
     public function getCachingStrategy()
