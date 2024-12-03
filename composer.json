@@ -26,12 +26,13 @@
         "symfony/twig-bundle": "^6.4 || ^7.1",
         "symfony/var-dumper": "^6.4 || ^7.1",
         "zenstruck/console-extra": "^1.4",
-        "symfony/ux-twig-component": "2.x-dev"
+        "symfony/ux-twig-component": "^2.22"
     },
     "autoload": {
         "psr-4": {
             "Survos\\PwaExtraBundle\\": "src/"
         }
     },
+    "prefer-stable": true,
     "minimum-stability": "dev"
 }
